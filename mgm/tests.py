@@ -6,7 +6,7 @@ import pickle
 from decimal import Decimal
 from datetime import datetime, timedelta
 
-from models import MemberInvitation, Credit, PendingConversionCredit
+from models import MemberInvitation, Credit, PendingConversionCredit, MGMLog
 
 class MGMTest(TestCase):
     
@@ -15,7 +15,7 @@ class MGMTest(TestCase):
         invitation = MemberInvitation.objects.create(invitator=u1, 
                                         credits_new_member=Decimal('5.0'),
                                         credits_invitator=Decimal('10.0'),
-                                        redeem_on_signup = True
+                                        convert_on_signup = True
                                         )
 
         client = Client()
@@ -30,7 +30,7 @@ class MGMTest(TestCase):
         invitation = MemberInvitation.objects.create(invitator=u1, 
                                         credits_new_member=Decimal('5.0'),
                                         credits_invitator=Decimal('10.0'),
-                                        redeem_on_signup = True
+                                        convert_on_signup = True
                                         )
         
         u2 = User.objects.create_user('u2','u2@dmgm.com','u2')
@@ -51,12 +51,17 @@ class MGMTest(TestCase):
         pendings = PendingConversionCredit.objects.all()
         self.assertEqual(pendings.count(), 0)
         
+        log = MGMLog.objects.all()
+        self.assertEqual(log.count(), 1)
+        self.assertEqual(log[0].user, u2)
+        self.assertEqual(log[0].invitator, u1)
+        
     def test_convert_on_conversion(self):
         u1 = User.objects.create_user('u1','u1@dmgm.com','u1')
         invitation = MemberInvitation.objects.create(invitator=u1, 
                                         credits_new_member=Decimal('5.0'),
                                         credits_invitator=Decimal('10.0'),
-                                        redeem_on_signup = False
+                                        convert_on_signup = False
                                         )
         
         u2 = User.objects.create_user('u2','u2@dmgm.com','u2')

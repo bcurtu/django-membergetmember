@@ -17,13 +17,13 @@ class MemberInvitationManager(models.Manager):
         If you use the middleware to track the invitation key with cookies, you can get the cookie by:
             invitation_key = pickle.loads(request.COOKIES.get(settings.MGM_COOKIE_NAME))
          '''
-        from mgm.models import Credit, PendingConversionCredit
+        from mgm.models import Credit, PendingConversionCredit, MGMLog
         try:
             invitation = self.get(key = invitation_key, expiration_date__gte=datetime.now())
         except:
             return False
         
-        if invitation.redeem_on_signup:
+        if invitation.convert_on_signup:
             # Create Credits for invitator if only signup is needed
             Credit.objects.create(user = invitation.invitator,
                                   credits = invitation.credits_invitator,
@@ -38,6 +38,9 @@ class MemberInvitationManager(models.Manager):
         Credit.objects.create(user = new_user,
                               credits = invitation.credits_new_member,
                               expiration_date = datetime.now() + timedelta(days=MGM_EXPIRATION_DAYS))
+        
+        MGMLog.objects.create(user=new_user, invitator=invitation.invitator)
+        
         return True
 
 

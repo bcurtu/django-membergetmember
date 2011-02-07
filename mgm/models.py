@@ -22,7 +22,7 @@ class MemberInvitation(models.Model):
     credits_new_member = models.DecimalField(max_digits=5, decimal_places=2)
     credits_invitator = models.DecimalField(max_digits=5, decimal_places=2)
     
-    redeem_on_signup = models.BooleanField(default=False) # Whether the invitator credits are converted on invitated sign up.
+    convert_on_signup = models.BooleanField(default=False) # Whether the invitator credits are converted on invitated sign up.
     
     expiration_date = models.DateTimeField()
     
@@ -64,3 +64,8 @@ class Credit(models.Model):
         if force_insert or not self.id:
             self.remaining = self.credits
         super(Credit,self).save(force_insert, force_update, using=using)
+        
+class MGMLog(models.Model):
+    creation_date = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, related_name='user_mgmlog')
+    invitator = models.ForeignKey(User, related_name='inivitator_mgmlog')

@@ -1,0 +1,59 @@
+h1. Django Member-Get-Member
+
+django-membergetmember (MGM) is an application to deal with MGM campaigns to get new users using "convertible credits" to incentivate them.
+
+h2. What's a Member-Get-Member campaign?
+
+You can find these MGM campaigns in multiple e-commerce sites, like groupon or livingsocial. 
+There is a current member, the invitator user, that is offered to get new members for the site and get some money for every one of them.
+So the user invitator gets 5$ when a friend joins the site or when this new member buys something. This new member usually gets some credits, too.
+
+h2. MGM concepts:
+
+* Credit: A internal coin to be used (redeemed) in a buy. It has an expiration date to incentivate the user to buy asap.
+* Redeem: The action to convert the credits in real money, and to be discounted from the final amount.
+* conversion on signup: The invitator user gets its credits when a friend signs up
+* conversion on conversion: The invitator user gets its credits when the new member buys something
+* Invitation code: It's a code to identify who the invitator user is, when the new member signs up.
+
+h2. Setup
+
+# Copy the mgm folder in your project
+# Add it to the settings.py's INSTALLED_APPS list
+# call syncdb or create a migration
+# modify your settings.py file: @MGM_EXPIRATION_DAYS=@ number of days until a Credit expires
+
+h2. Integrate it in your code
+
+You can read the tests.py's tests. They test the different alternatives:
+* Convert on signup: test_convert_on_signup
+* Convert on conversion: test_convert_on_conversion
+* Redeem credits: test_redeem_credits. Remember to use @redeem(..., commit=False)@ when you show the total amount to be paid, 
+and @redeem(..., commit=True)@ when the payment is actually done.
+
+h2. Track the invitation key
+
+Once the app creates the invitation (MemberInvitation class) the user will propagate the key via email or social media.
+
+There are different mechanisms in order to track this key:
+* Ask the new user to write it down in the signup form: It sucks, not recommeded.
+* Ask the invitator to write down the emails from their friends. It sucks even more, forget it.
+* Create a url including the key to propagate it. Then get the key from it. For example, you can add the key as a GET argument:
+** The url points to the signup form. In this case you can write the key down in a hidden field in the signup form.
+** The url points to anywhere in your site. You can use cookies to store the key (continue reading)
+
+h3. Middleware to track the invitation key using cookies
+
+django-membergetmember provides a middleware to track the code using cookies. 
+To activate it just add this middleware to your settings.py's MIDDLEWARE_CLASSES:
+@'mgm.middleware.MemberGetMemberMiddleware',@
+
+It will capture any request with a GET argument (that you can setup in settings.MGM_COOKIE_NAME) and it will create a cookie with this invitation code.
+
+Then, when a users signs up you have to read the content of the cookie. You may use this code:
+
+<pre><code>import pickle
+if request.COOKIES.get(settings.MGM_COOKIE_NAME, False):
+	invitation_key = pickle.loads(request.COOKIES.get(settings.MGM_COOKIE_NAME))
+</code></pre>
+ 
