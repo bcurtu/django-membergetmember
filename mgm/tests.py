@@ -11,7 +11,7 @@ from models import MemberInvitation, Credit, PendingConversionCredit, MGMLog
 class MGMTest(TestCase):
     
     def test_middleware(self):
-        u1 = User.objects.create_user('u1','u1@dmgm.com','u1')
+        u1 = User.objects.create_user('u1','u@dmgm.com','u1')
         invitation = MemberInvitation.objects.create(invitator=u1, 
                                         credits_new_member=Decimal('5.0'),
                                         credits_invitator=Decimal('10.0'),

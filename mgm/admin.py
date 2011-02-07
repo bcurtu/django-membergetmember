@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from models import MemberInvitation, Credit, PendingConversionCredit, MGMLog
 
+
 class MemberInvitationAdmin(admin.ModelAdmin):
     list_display = ('creation_date', 'key', 'invitator', 'credits_new_member', 'credits_invitator', 'convert_on_signup', 'expiration_date')
     list_filter = ('creation_date', 'expiration_date', 'convert_on_signup')
