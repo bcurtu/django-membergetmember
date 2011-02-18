@@ -111,6 +111,12 @@ class MGMTest(TestCase):
         credits = Credit.objects.available(u1)
         self.assertEqual(credits, Decimal('15.0'))
 
+        price_to_be_paid = Decimal('7.0')
+        price_after_credits = Credit.objects.redeem(u1, price_to_be_paid, max_to_redeem=Decimal('5.0'), commit=False)
+        self.assertEqual(price_after_credits, Decimal('2.0'))
+        credits = Credit.objects.available(u1)
+        self.assertEqual(credits, Decimal('15.0'))
+
         price_after_credits = Credit.objects.redeem(u1, price_to_be_paid, commit=True)
         self.assertEqual(price_after_credits, Decimal('0.0'))
         credits = Credit.objects.available(u1)

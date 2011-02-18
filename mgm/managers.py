@@ -65,16 +65,24 @@ class PendingConversionCreditManager(models.Manager):
         return True
     
 class CreditManager(models.Manager):
-    def redeem(self, user, cost, commit=False):
+    def redeem(self, user, cost, max_to_redeem=0, commit=False):
         ''' Call this method twice:
         * First, to show the checkout summary, using the credits. Use commit=False
         * Second, When the user actually has paid, to redeem the credits. Use commit=True
         '''
         credits = self.filter(user=user, remaining__gt=0, expiration_date__gte=datetime.now()).order_by('expiration_date')
+        to_be_redeemed = max_to_redeem
+        import pdb;pdb.set_trace()
         for credit in credits:
             remaining = credit.remaining
+            
+            if max_to_redeem and to_be_redeemed<=remaining:
+                remaining = to_be_redeemed
+            if max_to_redeem:
+                to_be_redeemed -= remaining
+                
             if cost>=remaining:
-                cost -= credit.remaining
+                cost -= remaining
                 credit.remaining = Decimal('0.0')
             else:
                 credit.remaining -= cost
@@ -83,6 +91,7 @@ class CreditManager(models.Manager):
                 credit.used_date = datetime.now()
                 credit.save()
             if cost==Decimal('0.0'): break
+            if max_to_redeem and to_be_redeemed<=Decimal('0.0'): break
         
         return cost
             
