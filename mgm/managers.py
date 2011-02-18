@@ -72,7 +72,6 @@ class CreditManager(models.Manager):
         '''
         credits = self.filter(user=user, remaining__gt=0, expiration_date__gte=datetime.now()).order_by('expiration_date')
         to_be_redeemed = max_to_redeem
-        import pdb;pdb.set_trace()
         for credit in credits:
             remaining = credit.remaining
             
@@ -97,6 +96,6 @@ class CreditManager(models.Manager):
             
     def available(self, user):
         credits = self.filter(user=user, expiration_date__gte=datetime.now()).aggregate(Sum('remaining'))
-        if not credits: return Decimal('0.0')
+        if not credits or not credits['remaining__sum']: return Decimal('0.0')
         return credits['remaining__sum']
     
